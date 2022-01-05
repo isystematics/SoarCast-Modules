@@ -163,7 +163,7 @@ SoarCast-Modules/
 ```
 
 ### init.sls state
-When either Soarcast or salt runs the readiness state, salt looks at the 'init.sls' file to collect all the salt states need to run. Once these states are collected salt will run them automatically. These states that are referenced in the 'init.sls' state ensure all prerequisites are met for your module. For the example below only the 'prereqs.sls' file is called but you might want to call multiple states and this is where you would define those such that they are called during the readiness state.
+When either Soarcast or salt runs the readiness state, salt looks at the 'init.sls' file to collect all the salt states that need to run. Once these states are collected, salt will run them automatically. The states that are referenced in the 'init.sls' state ensure all prerequisites are met for your module. For the example below only the 'prereqs.sls' file is called but you might want to call multiple states and this is where you would define those such that they are called during the readiness state.
 ```
 include:
   - .prereqs
@@ -172,20 +172,19 @@ include:
 ### prereq.sls state
 The 'prereqs.sls' state ensures that all apt packages and python modules are installed. Below is an example of installing 'apt' packages. If you wanted to install python modules through pip you would change the 'pkg.installed' to 'pip.installed'
 
-Sets up apt packages and pip modules
 ```
 python3-pip:                # apt package to install
-  pkg.installed             # command to install it if it does not already exist
+  pkg.installed             # command to install the apt package if it does not already exist
 
 cloc:                       # apt package to install
-  pkg.installed             # command to install it if it does not already exist
+  pkg.installed             # command to install the apt package if it does not already exist
 
 git:                        # apt package to install
-  pkg.installed             # command to install it if it does not already exist
+  pkg.installed             # command to install the apt package if it does not already exist
 ```
 
 ## Congratulations!
-At this point in the documentation you should have everything you need to create your own Soarcast module and readiness state. Below are some helpful tips for understanding salt but the are not required to be able to make your first Soarcast module. If you have any questions please send an email to mroberts@isystematics.com
+At this point in the documentation you should have everything you need to create your own Soarcast module and readiness state. Below are some helpful tips for understanding salt but they are not required to be able to make your first Soarcast module. If you have any questions please send me an email at mroberts@isystematics.com
 
 Happy coding!
 
