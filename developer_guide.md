@@ -4,8 +4,8 @@ _Last updated: 01/03/2022_
 
 Creating modules for Soarcast to use in salt is straight forward and this guide will help you along the way to create your own. This documentation will cover standards for the module's functions and readiness state. We will also give you some guidance on how to understand local file structures, scripts and logging when working in salt to alleviate some common salt headaches. If you are familiar with scripting in python, we will be applying the following changes to your script to make it a fully functional Soarcast module.
 
-- Turning your script into a properly formatted run(), \_\_virtual\_\_(), and (optional) "helper" functions
-- Adding a readiness state to setup the salt minion to be able to run your module
+- Turning your script into properly formatted run(), \_\_virtual\_\_(), and (optional) "helper" functions
+- Creating a readiness state that ensures all prerequisites are met for your module
 
 # **Functions**
 Functions in Soarcast salt modules are the split into three groups. The \_\_virtual\_\_() function, which is run automatically by salt before any other function in the module, ensures base conditions are met like python libraries and logging configurations. The run() function gets called from the master and is the central part of the module. Then there are the helper functions which are optional, used locally in the module, and not meant to be called from outside the module.
