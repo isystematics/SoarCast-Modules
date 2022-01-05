@@ -8,7 +8,7 @@ Creating modules for Soarcast to use in salt is straight forward and this guide 
 - Creating a readiness state that ensures all prerequisites are met for your module
 
 # **Functions**
-Functions in Soarcast salt modules are split into three groups. The \_\_virtual\_\_() function, which is run automatically by salt before any other function in the module. This ensures that base conditions are met like python libraries, specific OS types, and logging configurations. The run() function gets called from the master and is the central part of the module. Then there are the helper functions which are optional, used locally in the module, and not meant to be called from outside the module.
+Functions in Soarcast salt modules are split into three groups. The \_\_virtual\_\_() function, which is run automatically by salt before any other function in the module. This ensures that base conditions are met like python libraries, specific OS types, and logging configurations. The run() function gets called from the master and is the central part of the module. Then there are the helper functions which are optional, used locally in the module, and can not be called from outside the module.
 
 \*Note: see _modules/example_module.py to see the whole example module being referenced in this section.
 
