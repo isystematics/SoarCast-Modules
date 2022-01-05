@@ -130,7 +130,7 @@ except Exception as e:
 ```
 
 ## **_helper functions**
-These functions are optional. Helper functions are only accessible from within the module so they cannot be called separately by salt. The doc string for these functions can be minimal. The main thing to keep in mind is to add an underscore "_" before the function name. Here is an example of a helper function:
+These functions are optional. Helper functions are only accessible from within the module so they cannot be called separately by salt or Soarcast. The doc string for these functions can be minimal. The main thing to keep in mind is to add an underscore "_" before the function name. Here is an example of a helper function:
 ```
 def _ensure_dir_exists(directory_to_check):
     """
@@ -152,7 +152,7 @@ The folder structure is pretty rigid when it comes to salt so be sure to follow 
 
 
 ```
-salt/
+SoarCast-Modules/
 ├── README.md
 ├── _modules                    # the folder for all Soarcast modules
 │   └── example_module.py       # our example module
