@@ -13,7 +13,7 @@ Functions in Soarcast salt modules are split into three groups. The \_\_virtual\
 \*Note: see _modules/example_module.py to see the whole example module being referenced in this section.
 
 ## **module doc string, imports, logging, and the \_\_virtual()\_\_ function**
-Before we go and write our Soarcast modules we need to setup the module doc string, imports, logging, and the \_\_virtual\_\_ function. These in conjunction with the readiness state will ensure the module's prerequisites are met before execution of the module.
+Before we go and write our Soarcast modules, we need to setup the module doc string, imports, logging, and the \_\_virtual\_\_ function. These in conjunction with the readiness state will ensure the module's prerequisites are met before it is executed.
 
 ### module doc string
 The module doc string is meant to give the end user an idea of what your module does and how to use it. This doc string is located at the top of the module before any imports. This doc string should be split into details, background, usage, and preflight. The **details** give information on version, date last updated, and who last updated it. The version number is arbitrary, just make sure that it increases on each commit. The **background** gives the end user an understanding of the tool that your module is harnessing. **Usage** explains what is accomplished by the module and what the expected outcomes of the module are. The goal for the Usage section is for the end user to understand how to use this module in conjunction with other modules without getting bogged down in the details. **Preflight** is a list of items to accomplish before trying to run the module. This list will include at a minimum the readiness state for your module. Here is an example of a module doc string:
@@ -64,7 +64,7 @@ It is necessary to setup logging for Soarcast modules so that the module error h
 ```
 log = logging.getLogger(__name__)
 ```
-\*Note: Python logging integrations like Sentry and Loggly do not interfere with salt logging.
+\*Note: Python logging integrations like Sentry and Loggly do not interfere with salt logging and can be used along side with no side effects.
 ### \_\_virtual\_\_() function
 This function can be empty but we recommend that you add in both python module and OS verification. This function is also a good place to setup logging integration if you are using an outside logging solution like Sentry or Loggly. Note that either way you will **need to have this function return true for salt to execute the rest of the module**. A doc string for this function is completely optional. Here's an example:
 ```
