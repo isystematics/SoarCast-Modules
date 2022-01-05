@@ -1,6 +1,6 @@
 # Soarcast Developer Guide
 _Created by: Michael Roberts_
-_Last updated: 01/03/2022_
+_Last updated: 01/05/2022_
 
 Creating modules for Soarcast to use in salt is straight forward and this guide will help you along the way to create your own. This documentation will cover standards for the module's functions and readiness state. We will also give you some guidance on how to understand local file structures, scripts and logging when working in salt to alleviate some common salt headaches. If you are familiar with scripting in python, we will be applying the following changes to your script to make it a fully functional Soarcast module.
 
