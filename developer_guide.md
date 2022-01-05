@@ -60,7 +60,7 @@ import logging, sys, os, json, datetime, subprocess, platform
 ```
 
 ### Logging
-It is necessary to setup logging for Soarcast modules so that the module error handling is caught by the salt minion logs. If setup properly this will give feedback to the end user on the status of their module executions. This especially useful for long running modules. Here's an example:
+It is necessary to setup logging for Soarcast modules so that the module error handling is caught by the salt minion logs. (These logs can be found on the minion at /var/log/salt/minion and they are picked up by Soarcast) If setup properly, this logging should give feedback to the end user on the status of their module executions. This is especially useful for long running modules. Here's an example:
 ```
 log = logging.getLogger(__name__)
 ```
@@ -145,39 +145,49 @@ def _ensure_dir_exists(directory_to_check):
 ```
 
 ## **Readiness state**
-The readiness state is a salt state that functions as your preflight check for your module. This is a salt state that will ensure all apt packages, python modules are setup properly before your module is run. Creating a state is different than Python but if you follow these guidelines you will be good to write your own readiness state in no time.
+The readiness state is a salt state that functions as your preflight check for your module. This is a salt state that will ensure all apt packages and python modules are setup properly before your module is run. If you have experience working with YAML files this part will come more naturally to you, but if you follow these guidelines you will be good to write your own readiness state in no time.
 
 ### folder structure
-Module under _modules. State has it's own folder under salt named after the module. Inside of this folder are the files init.sls and prereqs.sls
+The folder structure is pretty rigid when it comes to salt so be sure to follow these rules. All the modules that we create for Soarcast are found in the _modules directory. Make sure to only put modules in this directory. When creating a readiness state, you will create a folder named after the module that your state is supporting. In our example we have a module named 'example_module.py' so we have created a folder named 'example_module'. Inside of this folder we need to create two files: 'init.sls' and 'prereqs.sls'. Here is an example of the expected file structure:
+
+
+```
+salt/
+├── README.md
+├── _modules                    # the folder for all Soarcast modules
+│   └── example_module.py       # our example module
+├── developer_guide.md          # this developer_guide.md
+└── example_module              # our readiness state folder
+    ├── init.sls                # our readiness state init.sls file
+    └── prereqs.sls             # our readiness state prereqs.sls file
+```
 
 ### init.sls state
-references prereq state
+When either Soarcast or salt runs the readiness state, salt looks at the 'init.sls' file to collect all the salt states need to run. Once these states are collected salt will run them automatically. These states that are referenced in the 'init.sls' state ensure all prerequisites are met for your module. For the example below only the 'prereqs.sls' file is called but you might want to call multiple states and this is where you would define those such that they are called during the readiness state.
 ```
 include:
   - .prereqs
 ```
 
 ### prereq.sls state
+The 'prereqs.sls' state ensures that all apt packages and python modules are installed. Below is an example of installing 'apt' packages. If you wanted to install python modules through pip you would change the 'pkg.installed' to 'pip.installed'
+
 Sets up apt packages and pip modules
 ```
-python3-pip:
-  pkg.installed
+python3-pip:                # apt package to install
+  pkg.installed             # command to install it if it does not already exist
 
-cloc:
-  pkg.installed
+cloc:                       # apt package to install
+  pkg.installed             # command to install it if it does not already exist
 
-git:
-  pkg.installed
+git:                        # apt package to install
+  pkg.installed             # command to install it if it does not already exist
 ```
-### Create prereq states for all modules (Readiness states)
-  - where are the states located?
-  - what is the formatting needed for salt?
-  - pip3 installation through the prereq state
-  - apt get installation through the prereq state
-  - misc installation through script
-  - make sure to follow these guidelines for acceptable pip and apt packages
-  - module readme location
 
+## Congratulations!
+At this point in the documentation you should have everything you need to create your own Soarcast module and readiness state. Below are some helpful tips for understanding salt but the are not required to be able to make your first Soarcast module. If you have any questions please send an email to mroberts@isystematics.com
+
+Happy coding!
 
 ## **Salt Notes**
 
@@ -189,27 +199,13 @@ git:
   - any file restrictions on the minion will affect file creation and modification. Take this into consideration while creating/modifying your modules
   - suggested locations for intermediary files would be in the temp folder on the minion under a folder named after your module's name.  Example: /tmp/your_module_name/*
 
-## Understanding Salt logging
-  - salt logs to the minion at specific locations
 
-
-## Header
-Make sure to add in header information to your code and update it every time you make a commit to the repo. The version number is arbitrary, just make sure that it increases on each commit. Here's an example:
-```
-# Version: 0.1
-# Purpose: This code does <this overall function>
-# Last updated: 01/03/2022
-# By: Michael Roberts
-```
-
-## Later
+## Roadmap:
 1. Redis integration:
   - why
   - what methods?
-  - setup in virtual function
-  - redis enabled module
-	- easy for use
-  - Redis not enabled
+  - setup in virtual function?
+  - redis enabled module functionality (easy for use)
   - mapping is more complicated
-
-subprocess
+2. Misc installation through script and other salt state capabilities
+3. Add unit testing common practices and framework
