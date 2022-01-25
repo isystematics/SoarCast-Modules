@@ -49,7 +49,9 @@ def __virtual__():
     return True
 
 
-def run(target_vpc=None, output_format=None):
+def run(target_vpc=None, output_format=None, aws_key_id=None, aws_key=None,
+    s3_bucket_name=None, s3_key_id=None, s3_key=None, aws_role_arn=None,
+    aws_session_name=None, aws_external_id=None):
     """
     This function describes all SGs in a VPC and uplaod to S3. If the S3 upload
     fails or is not desired the file can be found locally here
