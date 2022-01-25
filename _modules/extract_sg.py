@@ -28,7 +28,7 @@ This module depends on the extract_sg salt state to be run first.
 """
 
 
-import logging, sys, os, json, datetime, subprocess, platform
+import boto3, logging, sys, os, json, csv, time, platform
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def __virtual__():
     """
     Verify all python dependencies and OS requirements are met
     """
-    modules = ['logging','sys','os','json','subprocess','platform']
+    modules = ['logging','sys','os','json','csv','time','platform']
     HAS_DEPS = False
     if all(mod in str(sys.modules) for mod in modules):
         HAS_DEPS = True
@@ -49,8 +49,8 @@ def __virtual__():
     return True
 
 
-def run(target_vpc=None, output_format=None, aws_key_id=None, aws_key=None,
-    s3_bucket_name=None, s3_key_id=None, s3_key=None, aws_role_arn=None,
+def run(target_vpc_id=None, target_region=None, output_format=None, aws_key_id=None,
+    aws_key=None, s3_bucket_name=None, s3_key_id=None, s3_key=None, aws_role_arn=None,
     aws_session_name=None, aws_external_id=None):
     """
     This function describes all SGs in a VPC and uplaod to S3. If the S3 upload
@@ -58,7 +58,8 @@ def run(target_vpc=None, output_format=None, aws_key_id=None, aws_key=None,
     /tmp/extract_sg/aws_sg_<EPOCH_TIME>.<json/csv>
 
     Pillar Example:
-        target_vpc:     ''
+        target_vpc_id:     ''
+        target_region:  us-east-1
         output_format:  json            supported options: json and csv
         aws_key_id:     AKIA...
         aws_key:        rikj...
@@ -76,15 +77,16 @@ def run(target_vpc=None, output_format=None, aws_key_id=None, aws_key=None,
         salt <minion_name> extract_sg.run
 
         *Without pillars set:
-        salt <minion_name> extract_sg.run <target_vpc> <target_vpc>
+        salt <minion_name> extract_sg.run <target_vpc_id> <target_vpc>
     """
 
     # Manditory module pillars
-    target_vpc = target_vpc or __pillar__.get('target_vpc')
+    target_vpc_id = target_vpc_id or __pillar__.get('target_vpc_id')
+    target_region = target_region or __pillar__.get('target_region')
     output_format = output_format or __pillar__.get('output_format')
     aws_key_id = aws_key_id or __pillar__.get('aws_key_id')
     aws_key = aws_key or __pillar__.get('aws_key')
-    if any([target_vpc==None, output_format==None, aws_key_id==None, aws_key==None]):
+    if any([target_vpc_id==None, output_format==None, aws_key_id==None, aws_key==None]):
         log.error("Mandatory perameters not set for extract_sg module")
 
     # S3 pillars
@@ -102,32 +104,81 @@ def run(target_vpc=None, output_format=None, aws_key_id=None, aws_key=None,
         log.error("STS perameters not set for extract_sg module, running without STS")
 
     # Create save filename and ensure that path exists
-    extract_sg_path = "/tmp/extract_sg/".format(folder_name)
-    save_file_name = extract_sg_path + "aws_sg_{}.{}".format(datetime.datetime.now().strftime('%m-%d-%y'), str(output_format))
+    extract_sg_path = "/tmp/extract_sg/"
+    save_file_name = extract_sg_path + "aws_sg_{}.{}".format(str(time.time()), str(output_format))
     _ensure_dir_exists(extract_sg_path)
 
     # If STS is being used, get temp creds
     if all([aws_role_arn!=None, aws_session_name!=None, aws_external_id!=None]):
         try:
-            certs = aws_sts_assume_role(aws_key_id, aws_key, aws_role_arn, aws_session_name, aws_external_id)
+            certs = _aws_sts_assume_role(aws_key_id, aws_key, aws_role_arn, aws_session_name, aws_external_id)
             [aws_key_id, aws_key, scan_source_token] = certs
+            sts_assume_role = True
             log_file +="sts_assume creds success\n"
         except Exception as e:
-            log.error("There was an error assuming STS role. {}".format(e))
+            log.error("There was an error assuming STS role. \n{}".format(e))
+    else:
+        sts_assume_role = False
 
-    # Get SG data from target_vpc
+    # Setup ec2 client
+    if sts_assume_role==True:
+        ec2_client = boto3.client('ec2', aws_access_key_id=aws_key_id, aws_secret_access_key=aws_key,
+            aws_session_token=aws_sts_token, region_name=target_region)
+    else:
+        ec2_client = boto3.client('ec2', aws_access_key_id=aws_key_id, aws_secret_access_key=aws_key,
+            region_name=target_region)
+
+    # Get SG data from target_vpc_id
+    try:
+        response = ec2_client.describe_security_groups()
+        vpc_data= {}
+        vpc_data['Vpc_Id'] = target_vpc_id
+        for sg in response['SecurityGroups']:
+            if sg['VpcId'] == target_vpc_id:
+                vpc_data[sg['GroupId']] = {'IpPermissions': sg['IpPermissions']}, {'IpPermissionsEgress': sg['IpPermissionsEgress']}
+    except ClientError as e:
+        log.error("An error occured while describing security groups in extract_sg module. \n{}".format(e))
+
+    # Save as desired format
+    if output_format == 'json':
+        try:
+            with open(save_file_name, 'w') as fp:
+                json.dump(vpc_data, fp)
+        except Exception as e:
+            log.error("An error occured while saving {} in extract_sg module. \n{}".format(save_file_name, e))
+    elif output_format == 'csv':
+        with open(save_file_name, "w", newline="") as csv_file:
+            
+            for key, value in vpc_data.items():
+                if 'Vpc' not in key:
+                    ingress = []
+                    egress = []
+                    for item in value[0]['IpPermissions']:
+                        ingress.append(item['IpRanges'])
+                    for item in value[1]['IpPermissionsEgress']:
+                        egress.append(item['IpRanges'])
+
+
+
+        with open(save_file_name, "w", newline="") as csv_file:
+            writer = csv.DictWriter(csv_file)
+            writer.writerows(vpc_data)
+        log.error('nothing here yet')
+    else:
+        log.error("output_format variable not set correctly in extract_sg module. Use either 'csv' or 'json'")
 
     # Save to S3
     if s3_key!=None and s3_key_id!=None and s3_bucket_name!=None:
-        s3_filename = "AWS-SG-{}.{}}".format(str(time.time()), output_format)
+        s3_filename = "AWS-SG-{}.{}".format(str(time.time()), output_format)
         s3_resource = boto3.resource('s3',
                                     aws_access_key_id=s3_key_id,
                                     aws_secret_access_key=s3_key)
         s3_resource.meta.client.upload_file(Filename=save_file_name,
                                     Bucket=s3_bucket_name,
                                     Key=s3_filename)
-        log_file += s3_filename + ' saved to s3\n'
+        log.error('{} saved to s3\n'.format(s3_filename))
 
+    return True
 
 def _ensure_dir_exists(directory_to_check):
     """
@@ -142,7 +193,7 @@ def _ensure_dir_exists(directory_to_check):
         log.error("Could not create directory {}. \n{}".format(directory_to_check, e))
 
 
-def aws_sts_assume_role(aws_key_id, aws_key, aws_role_arn, aws_session_name, aws_external_id):
+def _aws_sts_assume_role(aws_key_id, aws_key, aws_role_arn, aws_session_name, aws_external_id):
     """
     this funtion uses the provided aws creds to the assume another aws role
     input perameters:
