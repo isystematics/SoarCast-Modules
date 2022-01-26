@@ -58,15 +58,15 @@ def run(target_vpc_id=None, target_region=None, output_format=None, aws_key_id=N
     /tmp/extract_sg/aws_sg_<EPOCH_TIME>.<json/csv>
 
     Pillar Example:
-        target_vpc_id:     ''
+        target_vpc_id:  vpc-dfgh....
         target_region:  us-east-1
         output_format:  json            supported options: json and csv
         aws_key_id:     AKIA...
         aws_key:        rikj...
 
-        s3_bucket_name: <s3_bucket_name>        (optional)
-        s3_key_id:      AKIA...                 (optional)
-        s3_key:         OQoK...                 (optional)
+        s3_bucket_name: mybucke...      (optional)
+        s3_key_id:      AKIA...         (optional)
+        s3_key:         OQoK...         (optional)
 
         aws_role_arn:           (optional) aws arn of the role to assume
         aws_session_name:       (optional) session name for the role assumed
@@ -207,7 +207,7 @@ def _ensure_dir_exists(directory_to_check):
 def _aws_sts_assume_role(aws_key_id, aws_key, aws_role_arn, aws_session_name, aws_external_id):
     """
     version: 0.1
-    this funtion uses the provided aws creds to the assume another aws role
+    this funtion uses the provided aws creds to assume another aws role
     input perameters:
         aws_key_id:        starting aws_key_id
         aws_key:           starting aws_key
