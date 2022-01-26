@@ -1,8 +1,8 @@
 """
 # Details
-Version: 0.1
+Version: 0.2
 Purpose: This module extracts security group information from aws from the desired VPC
-Last updated: 01/25/2022
+Last updated: 01/26/2022
 By: Michael Roberts
 
 # Background
@@ -166,7 +166,7 @@ def run(target_vpc_id=None, target_region=None, output_format=None, aws_key_id=N
                                 for key in rule.keys():
                                     line += '{}: {}  \n'.format(key, rule[key])
                                 csv_file.write(line)     # todo change to csv write
-                        csv_file.write('Engress Rules')     # todo change to csv write
+                        csv_file.write('Engress Rules\n')     # todo change to csv write
                         for engress in sg_engress:
                             for rule in engress:
                                 line = ''
@@ -206,6 +206,7 @@ def _ensure_dir_exists(directory_to_check):
 
 def _aws_sts_assume_role(aws_key_id, aws_key, aws_role_arn, aws_session_name, aws_external_id):
     """
+    version: 0.1
     this funtion uses the provided aws creds to the assume another aws role
     input perameters:
         aws_key_id:        starting aws_key_id
