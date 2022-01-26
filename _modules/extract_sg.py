@@ -64,9 +64,9 @@ def run(target_vpc_id=None, target_region=None, output_format=None, aws_key_id=N
         aws_key_id:     AKIA...
         aws_key:        rikj...
 
-        s3_bucket_name: mybucke...      (optional)
-        s3_key_id:      AKIA...         (optional)
-        s3_key:         OQoK...         (optional)
+        s3_bucket_name: mybucke...      (optional) s3 bucket to upload to
+        s3_key_id:      AKIA...         (optional) s3 key id to use while uploading
+        s3_key:         OQoK...         (optional) s3 key to use while uploading
 
         aws_role_arn:           (optional) aws arn of the role to assume
         aws_session_name:       (optional) session name for the role assumed
