@@ -147,23 +147,34 @@ def run(target_vpc_id=None, target_region=None, output_format=None, aws_key_id=N
         except Exception as e:
             log.error("An error occured while saving {} in extract_sg module. \n{}".format(save_file_name, e))
     elif output_format == 'csv':
-        with open(save_file_name, "w", newline="") as csv_file:
-            
-            for key, value in vpc_data.items():
-                if 'Vpc' not in key:
-                    ingress = []
-                    egress = []
-                    for item in value[0]['IpPermissions']:
-                        ingress.append(item['IpRanges'])
-                    for item in value[1]['IpPermissionsEgress']:
-                        egress.append(item['IpRanges'])
-
-
-
-        with open(save_file_name, "w", newline="") as csv_file:
-            writer = csv.DictWriter(csv_file)
-            writer.writerows(vpc_data)
-        log.error('nothing here yet')
+        try:
+            with open(save_file_name, "w") as csv_file:
+                csv_file.write('VPC: {}\n'.format(target_vpc_id))
+                for key, value in vpc_data.items():
+                    if 'Vpc' not in key:
+                        sg_ingress = []
+                        sg_engress = []
+                        for item in value[0]['IpPermissions']:
+                            sg_ingress.append(item['IpRanges'])
+                        for item in value[1]['IpPermissionsEgress']:
+                            sg_engress.append(item['IpRanges'])
+                        csv_file.write('Security Group: {}\n'.format(key))     # todo change to csv write
+                        csv_file.write('Ingress Rules\n')     # todo change to csv write
+                        for ingress in sg_ingress:
+                            for rule in ingress:
+                                line = ''
+                                for key in rule.keys():
+                                    line += '{}: {}  \n'.format(key, rule[key])
+                                csv_file.write(line)     # todo change to csv write
+                        csv_file.write('Engress Rules')     # todo change to csv write
+                        for engress in sg_engress:
+                            for rule in engress:
+                                line = ''
+                                for key in rule.keys():
+                                    line += '{}: {}  \n'.format(key, rule[key])
+                                csv_file.write(line)     # todo change to csv write
+        except Exception as e:
+            log.error("An error occured while writing security groups to csv in extract_sg module. \n{}".format(e))
     else:
         log.error("output_format variable not set correctly in extract_sg module. Use either 'csv' or 'json'")
 
