@@ -36,7 +36,7 @@ def __virtual__():
     """
     Verify all python dependencies and OS requirements are met
     """
-    modules = ['logging','sys','os','json','csv','time','platform']
+    modules = ['boto3','logging','sys','os','json','csv','time','platform']
     HAS_DEPS = False
     if all(mod in str(sys.modules) for mod in modules):
         HAS_DEPS = True
