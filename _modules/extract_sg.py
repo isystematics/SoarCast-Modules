@@ -12,12 +12,12 @@ egress rules associated with it.
 
 # Usage
 ## What is accomplished by this module?
-This function exports either a CVS or JSON formatted file containing the rules for
-all security groups under the specified VPC. This is both a standalone module and a
-module that can be linked to others.
+This function exports either a CVS or JSON formatted file containing the ingress and 
+egress rules forall security groups under the specified VPC. This is both a standalone 
+module and amodule that can be linked to others.
 
 ## What is the expected outcome of this module
-This module will authenticate to aws either with or without STS, find the specified
+This module will authenticate to aws either with or without aws STS, find the specified
 VPC, describe the security groups within that VPC, save it locally to
 /tmp/extract_sg/aws_sg_<EPOCH_TIME>.<json/csv>, and then upload to s3 if credentials are provided.
 
@@ -58,11 +58,11 @@ def run(target_vpc_id=None, target_region=None, output_format=None, aws_key_id=N
     /tmp/extract_sg/aws_sg_<EPOCH_TIME>.<json/csv>
 
     Pillar Example:
-        target_vpc_id:  vpc-dfgh....
-        target_region:  us-east-1
+        target_vpc_id:  vpc-dfgh....    VPC to target
+        target_region:  us-east-1       Region to Target
         output_format:  json            supported options: json and csv
-        aws_key_id:     AKIA...
-        aws_key:        rikj...
+        aws_key_id:     AKIA...         aws key id to access account
+        aws_key:        rikj...         aws key to access account
 
         s3_bucket_name: mybucke...      (optional) s3 bucket to upload to
         s3_key_id:      AKIA...         (optional) s3 key id to use while uploading
@@ -77,7 +77,9 @@ def run(target_vpc_id=None, target_region=None, output_format=None, aws_key_id=N
         salt <minion_name> extract_sg.run
 
         *Without pillars set:
-        salt <minion_name> extract_sg.run <target_vpc_id> <target_vpc>
+        salt <minion_name> extract_sg.run <target_vpc_id> <target_region> <output_format> 
+        <aws_key_id> <aws_key> <s3_bucket_name> <s3_key_id> <s3_key> <aws_role_arn> 
+        <aws_session_name> <aws_external_id>
     """
 
     # Manditory module pillars
