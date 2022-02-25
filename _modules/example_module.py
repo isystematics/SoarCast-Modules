@@ -53,6 +53,17 @@ def __virtual__():
     return True
 
 
+def prereq():
+    """
+    setup prereqisits for run function
+    """
+    __salt__["pkg.install"]("git")
+    __salt__["pkg.install"]("python3-pip")
+    __salt__["pkg.install"]("cloc")
+    __salt__["pip.install"]("redis")
+    return 'help'
+
+
 def run(github_repo_name=None):
     """
     This function downloads a specified github repo and runs it through CLOC
