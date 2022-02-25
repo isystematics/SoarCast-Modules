@@ -61,7 +61,6 @@ def prereq():
         __salt__["pkg.install"]("git")
         __salt__["pkg.install"]("python3-pip")
         __salt__["pkg.install"]("cloc")
-        __salt__["pip.install"]("redis")
         return True
     except:
         return False
