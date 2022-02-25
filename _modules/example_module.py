@@ -28,7 +28,7 @@ are running CLOC against. You should expect it to take up to 5 minutes before th
 json data is saved. This module is compatible with both soarcast and CLI salt interactions.
 
 # Preflight
-This module depends on the example_module salt state to be run first.
+This module depends on the prereq function to be run first.
 """
 
 
@@ -61,7 +61,6 @@ def prereq():
         __salt__["pkg.install"]("git")
         __salt__["pkg.install"]("python3-pip")
         __salt__["pkg.install"]("cloc")
-        __salt__["pip.install"]("redis")
         return True
     except:
         return False
