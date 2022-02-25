@@ -55,13 +55,16 @@ def __virtual__():
 
 def prereq():
     """
-    setup prereqisits for run function
+    Setup prereqisits for run function
     """
-    __salt__["pkg.install"]("git")
-    __salt__["pkg.install"]("python3-pip")
-    __salt__["pkg.install"]("cloc")
-    __salt__["pip.install"]("redis")
-    return 'help'
+    try:
+        __salt__["pkg.install"]("git")
+        __salt__["pkg.install"]("python3-pip")
+        __salt__["pkg.install"]("cloc")
+        __salt__["pip.install"]("redis")
+        return True
+    except:
+        return False
 
 
 def run(github_repo_name=None):
